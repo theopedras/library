@@ -27,6 +27,12 @@ class Rental:
                 amount += (self.days_rented - 3) * 1.5
         return amount
 
+    def get_frequent_renter_points(self) -> int:
+        points = 1
+        if self.book.price_code == Book.NEW_RELEASE and self.days_rented > 1:
+            points += 1
+        return points
+
 class Client:
 
     def __init__(self, name: str):
@@ -43,17 +49,11 @@ class Client:
         
         for rental in self.rentals:
             amount = rental.get_charge()
+            frequent_renter_points += rental.get_frequent_renter_points()  # ✅ Correto: acumula os pontos
 
-            # add frequent renter points
-            frequent_renter_points += 1
-            if rental.book.price_code == Book.NEW_RELEASE and rental.days_rented > 1:
-                frequent_renter_points += 1
-
-            # show each rental result
             result += f"- {rental.book.title}: {amount}\n"
             total_amount += amount
         
-        # show total result
         result += f"Total: {total_amount}\n"
         result += f"Points: {frequent_renter_points}"
         return result

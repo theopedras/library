@@ -1,33 +1,70 @@
+from abc import ABC, abstractmethod
+
+# Superclasse de preço
+class Price(ABC):
+
+    @abstractmethod
+    def get_charge(self, days_rented: int) -> float:
+        pass
+
+    def get_frequent_renter_points(self, days_rented: int) -> int:
+        return 1
+
+# Subclasse para livros REGULAR
+class RegularPrice(Price):
+
+    def get_charge(self, days_rented: int) -> float:
+        amount = 2
+        if days_rented > 2:
+            amount += (days_rented - 2) * 1.5
+        return amount
+
+# Subclasse para livros NEW_RELEASE
+class NewReleasePrice(Price):
+
+    def get_charge(self, days_rented: int) -> float:
+        return days_rented * 3
+
+    def get_frequent_renter_points(self, days_rented: int) -> int:
+        return 2 if days_rented > 1 else 1
+
+# Subclasse para livros CHILDREN
+class ChildrenPrice(Price):
+
+    def get_charge(self, days_rented: int) -> float:
+        amount = 1.5
+        if days_rented > 3:
+            amount += (days_rented - 3) * 1.5
+        return amount
+
+# Classe Book agora usa Price ao invés de price_code
 class Book:
 
-    REGULAR: int = 0
-    NEW_RELEASE: int = 1
-    CHILDREN: int = 2
+    REGULAR = 0
+    NEW_RELEASE = 1
+    CHILDREN = 2
 
     def __init__(self, title: str, price_code: int):
         self.title = title
-        self.price_code = price_code
+        self.set_price_code(price_code)
+
+    def set_price_code(self, price_code: int):
+        if price_code == Book.REGULAR:
+            self.price = RegularPrice()
+        elif price_code == Book.NEW_RELEASE:
+            self.price = NewReleasePrice()
+        elif price_code == Book.CHILDREN:
+            self.price = ChildrenPrice()
+        else:
+            raise ValueError("Invalid price code")
 
     def get_charge(self, days_rented: int) -> float:
-        amount = 0
-        if self.price_code == Book.REGULAR:
-            amount += 2
-            if days_rented > 2:
-                amount += (days_rented - 2) * 1.5
-        elif self.price_code == Book.NEW_RELEASE:
-            amount += days_rented * 3
-        elif self.price_code == Book.CHILDREN:
-            amount += 1.5
-            if days_rented > 3:
-                amount += (days_rented - 3) * 1.5
-        return amount
+        return self.price.get_charge(days_rented)
 
     def get_frequent_renter_points(self, days_rented: int) -> int:
-        points = 1
-        if self.price_code == Book.NEW_RELEASE and days_rented > 1:
-            points += 1
-        return points
+        return self.price.get_frequent_renter_points(days_rented)
 
+# Classe Rental permanece igual
 class Rental:
     def __init__(self, book: Book, days_rented: int):
         self.book = book
@@ -39,6 +76,7 @@ class Rental:
     def get_frequent_renter_points(self) -> int:
         return self.book.get_frequent_renter_points(self.days_rented)
 
+# Classe Client também permanece praticamente igual
 class Client:
 
     def __init__(self, name: str):

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+# Superclasse de preços
 class Price(ABC):
 
     @abstractmethod
@@ -9,16 +10,35 @@ class Price(ABC):
     def get_frequent_renter_points(self, days_rented: int) -> int:
         return 1
 
-# Subclasses ainda não implementadas (como planejado para falhar nos testes)
+# Subclasses com lógica de preço específica
 class RegulaPrice(Price):
-    pass
+    
+    def get_charge(self, days_rented: int) -> float:
+        amount = 2
+        if days_rented > 2:
+            amount += (days_rented - 2) * 1.5
+        return amount
 
 class NewReleasePrice(Price):
-    pass
+    
+    def get_charge(self, days_rented: int) -> float:
+        return days_rented * 3
+    
+    def get_frequent_renter_points(self, days_rented: int) -> int:
+        points = 1
+        if days_rented > 1:
+            points += 1
+        return points
 
 class ChildrenPrice(Price):
-    pass
+    
+    def get_charge(self, days_rented: int) -> float:
+        amount = 1.5
+        if days_rented > 3:
+            amount += (days_rented - 3) * 1.5
+        return amount
 
+# Classe Book refatorada
 class Book:
 
     REGULAR: int = 0
@@ -42,6 +62,7 @@ class Book:
     def get_frequent_renter_points(self, days_rented: int):
         return self.price.get_frequent_renter_points(days_rented)
 
+# Classe Rental
 class Rental:
     def __init__(self, book: Book, days_rented: int):
         self.book = book
@@ -53,6 +74,7 @@ class Rental:
     def get_frequent_renter_points(self) -> int:
         return self.book.get_frequent_renter_points(self.days_rented)
 
+# Classe Client
 class Client:
 
     def __init__(self, name: str):
